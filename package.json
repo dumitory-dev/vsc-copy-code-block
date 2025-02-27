@@ -1,0 +1,81 @@
+{
+  "name": "vsc-code-block-copier",
+  "displayName": "Code Block Copier",
+  "description": "Copy code blocks with line numbers and file paths for documentation and sharing",
+  "version": "0.0.1",
+  "publisher": "dumitory-dev",
+  "private": false,
+  "license": "MIT",
+  "author": {
+    "name": "dumitory-dev"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#1E1E1E",
+    "theme": "dark"
+  },
+  "categories": [
+    "Other",
+    "Formatters",
+    "Snippets"
+  ],
+  "keywords": [
+    "code",
+    "block",
+    "copy",
+    "line numbers",
+    "formatting",
+    "documentation",
+    "sharing",
+    "export"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/vsc-code-block-copier.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/vsc-code-block-copier/issues"
+  },
+  "homepage": "https://github.com/yourusername/vsc-code-block-copier#readme",
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vsc-code-block-copier.copyCodeBlock",
+        "title": "Code Block Copier: Copy Code Block"
+      }
+    ],
+    "scripts": {
+      "vscode:prepublish": "npm run package",
+      "vscode:package": "vsce package",
+      "compile": "npm-run-all compile:*",
+      "compile:types": "tsc --noEmit",
+      "compile:lint": "eslint src --ext ts",
+      "compile:build": "node esbuild.js"
+    },
+    "devDependencies": {
+      "@types/mocha": "^10.0.10",
+      "@types/node": "20.x",
+      "@types/vscode": "^1.97.0",
+      "@typescript-eslint/eslint-plugin": "^8.22.0",
+      "@typescript-eslint/parser": "^8.22.0",
+      "@vscode/test-cli": "^0.0.10",
+      "@vscode/test-electron": "^2.4.1",
+      "esbuild": "^0.25.0",
+      "eslint": "^9.19.0",
+      "npm-run-all": "^4.1.5",
+      "typescript": "^5.7.3"
+    },
+    "extensionDependencies": [],
+    "capabilities": {
+      "virtualWorkspaces": true,
+      "untrustedWorkspaces": {
+        "supported": true
+      }
+    }
+  }
+}
