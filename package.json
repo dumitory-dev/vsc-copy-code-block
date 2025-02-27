@@ -2,7 +2,7 @@
   "name": "vsc-code-block-copier",
   "displayName": "Code Block Copier",
   "description": "Copy code blocks with line numbers and file paths for documentation and sharing",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "publisher": "dumitory-dev",
   "private": false,
   "license": "MIT",
@@ -34,10 +34,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/vsc-code-block-copier.git"
+    "url": "https://github.com/dumitory-dev/vsc-copy-code-block"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/vsc-code-block-copier/issues"
+    "url": "https://github.com/dumitory-dev/vsc-copy-code-block/issues"
   },
   "homepage": "https://github.com/yourusername/vsc-code-block-copier#readme",
   "activationEvents": [],
