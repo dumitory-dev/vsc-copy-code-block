@@ -6,9 +6,7 @@
   "publisher": "dumitory-dev",
   "private": false,
   "license": "MIT",
-  "author": {
-    "name": "dumitory-dev"
-  },
+  "author": "dumitory-dev",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -34,7 +32,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/dumitory-dev/vsc-copy-code-block"
+    "url": "git+https://github.com/dumitory-dev/vsc-copy-code-block.git"
   },
   "bugs": {
     "url": "https://github.com/dumitory-dev/vsc-copy-code-block/issues"
@@ -47,35 +45,28 @@
       {
         "command": "vsc-code-block-copier.copyCodeBlock",
         "title": "Code Block Copier: Copy Code Block"
+      },
+      {
+        "command": "vsc-code-block-copier.copyCodeBlockAppend",
+        "title": "Code Block Copier: Copy Code Block (Append)"
       }
-    ],
-    "scripts": {
-      "vscode:prepublish": "npm run package",
-      "vscode:package": "vsce package",
-      "compile": "npm-run-all compile:*",
-      "compile:types": "tsc --noEmit",
-      "compile:lint": "eslint src --ext ts",
-      "compile:build": "node esbuild.js"
-    },
-    "devDependencies": {
-      "@types/mocha": "^10.0.10",
-      "@types/node": "20.x",
-      "@types/vscode": "^1.97.0",
-      "@typescript-eslint/eslint-plugin": "^8.22.0",
-      "@typescript-eslint/parser": "^8.22.0",
-      "@vscode/test-cli": "^0.0.10",
-      "@vscode/test-electron": "^2.4.1",
-      "esbuild": "^0.25.0",
-      "eslint": "^9.19.0",
-      "npm-run-all": "^4.1.5",
-      "typescript": "^5.7.3"
-    },
-    "extensionDependencies": [],
-    "capabilities": {
-      "virtualWorkspaces": true,
-      "untrustedWorkspaces": {
-        "supported": true
-      }
-    }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -w -p .",
+    "package": "vsce package",
+    "vscode:prepublish": "npm run compile",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/test-electron": "^2.5.2",
+    "mocha": "^11.7.5",
+    "typescript": "^5.7.3",
+    "vsce": "^2.15.0"
   }
 }
