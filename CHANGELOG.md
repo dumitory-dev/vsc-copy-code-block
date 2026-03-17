@@ -14,3 +14,9 @@ All notable changes to the "Code Block Copier" extension will be documented in t
 
 ## [0.0.4]
 - Add link to the repo
+
+## [0.0.5]
+- Refactor: extract formatting logic into separate module for testability
+- Fix: package.json structure (scripts/devDependencies were misplaced inside contributes)
+- Fix: resolve serialize-javascript high-severity vulnerability
+- Add: meaningful unit tests for code block formatting

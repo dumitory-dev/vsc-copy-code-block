@@ -2,7 +2,7 @@
   "name": "vsc-code-block-copier",
   "displayName": "Code Block Copier",
   "description": "Copy code blocks with line numbers and file paths for documentation and sharing",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "dumitory-dev",
   "private": false,
   "license": "MIT",
@@ -52,16 +52,19 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "vscode:package": "vsce package",
+    "package": "npm run compile:types && node esbuild.js --production",
     "compile": "npm-run-all compile:*",
     "compile:types": "tsc --noEmit",
     "compile:lint": "eslint src --ext ts",
-    "compile:build": "node esbuild.js"
+    "compile:build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "test": "tsc && vscode-test",
+    "test:unit": "tsc && mocha --ui tdd out/test/codeBlock.test.js"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
-    "@types/vscode": "^1.97.0",
+    "@types/vscode": "^1.90.0",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
     "@vscode/test-cli": "^0.0.12",
