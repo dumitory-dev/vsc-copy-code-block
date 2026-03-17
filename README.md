@@ -11,6 +11,7 @@ A VS Code extension that lets you copy code blocks with line numbers, file paths
 - **Line Numbers**: Automatically adds padded line numbers matching the source file
 - **File Path**: Includes the relative file path as a header
 - **Preserved Formatting**: Keeps original indentation and whitespace
+- **Append Mode**: Append new snippets to existing clipboard contents with a blank line separator
 
 ## Installation
 
@@ -23,10 +24,12 @@ Or install from the [Visual Studio Marketplace](https://marketplace.visualstudio
 
 ## Usage
 
-1. Select the code you want to copy
+1. (Optional) Select the code you want to copy. If nothing is selected, the extension copies the entire file.
 2. Open the Command Palette (`F1` or `Ctrl+Shift+P`)
 3. Run **"Code Block Copier: Copy Code Block"**
 4. Paste anywhere — the formatted block is in your clipboard
+
+To accumulate multiple snippets in your clipboard, run **"Code Block Copier: Copy Code Block (Append)"**. The new snippet is appended after previous clipboard content with a blank line separator.
 
 ## Example Output
 

@@ -47,6 +47,10 @@
       {
         "command": "vsc-code-block-copier.copyCodeBlock",
         "title": "Code Block Copier: Copy Code Block"
+      },
+      {
+        "command": "vsc-code-block-copier.copyCodeBlockAppend",
+        "title": "Code Block Copier: Copy Code Block (Append)"
       }
     ]
   },
@@ -59,7 +63,7 @@
     "compile:build": "node esbuild.js",
     "watch": "node esbuild.js --watch",
     "test": "tsc && vscode-test",
-    "test:unit": "tsc && mocha --ui tdd out/test/codeBlock.test.js"
+    "test:unit": "tsc && mocha --ui tdd out/test/codeBlock.test.js out/test/clipboard.test.js"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
