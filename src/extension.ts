@@ -1,12 +1,13 @@
 import * as vscode from 'vscode';
+import { makeCodeBlock } from './codeBlock';
+
+const COPY_CODE_BLOCK_COMMAND = 'vsc-code-block-copier.copyCodeBlock';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Code Block Copier is now active');
 
-    // Register the command to copy code block with metadata
-    let disposable = vscode.commands.registerCommand('vsc-code-block-copier.copyCodeBlock', async () => {
+    const disposable = vscode.commands.registerCommand(COPY_CODE_BLOCK_COMMAND, async () => {
         const editor = vscode.window.activeTextEditor;
-
         if (!editor) {
             vscode.window.showErrorMessage('No active editor found');
             return;
@@ -15,7 +16,6 @@ export function activate(context: vscode.ExtensionContext) {
         const document = editor.document;
         const selection = editor.selection;
         const selectedText = document.getText(selection);
-
         if (!selectedText) {
             vscode.window.showErrorMessage('No text selected');
             return;
@@ -23,14 +23,9 @@ export function activate(context: vscode.ExtensionContext) {
 
         const filePath = document.uri.fsPath;
         const relativePath = vscode.workspace.asRelativePath(filePath);
-        const startLine = selection.start.line + 1; // 1-based line numbers
+        const startLine = selection.start.line + 1; // VS Code lines are 0-based, display as 1-based
 
-        const output = makeCodeBlock(
-            selectedText,
-            relativePath,
-            startLine,
-        );
-
+        const output = makeCodeBlock(selectedText, relativePath, startLine);
         await vscode.env.clipboard.writeText(output);
 
         const lineCount = selectedText.split('\n').length;
@@ -39,29 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
         );
     });
 
-    // Register a command to configure formatting options
     context.subscriptions.push(disposable);
 }
 
-function makeCodeBlock(
-    code: string,
-    filePath: string,
-    startLine: number,
-): string {
-    const lines: string[] = [];
-    lines.push(`path: ${filePath}`);
-    const codeLines = code.split('\n');
-    const maxLineNumber = startLine + codeLines.length - 1;
-    const maxPadding = maxLineNumber.toString().length;
-    const lineNumberedCode = codeLines.map((line, index) => {
-        const lineNumber = startLine + index;
-        const paddedLineNumber = lineNumber.toString().padStart(maxPadding, ' ');
-        return `${paddedLineNumber}: ${line}`;
-    });
-    const processedCode = lineNumberedCode.join('\n');
-    lines.push(processedCode);
-    return lines.join('\n');
-}
-
-export function deactivate() {
-}
+export function deactivate() {}
