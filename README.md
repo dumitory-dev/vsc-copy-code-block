@@ -23,7 +23,7 @@ Or install from the [Visual Studio Marketplace](https://marketplace.visualstudio
 
 ## Usage
 
-1. Select the code you want to copy
+1. (Optional) Select the code you want to copy. If nothing is selected, the extension copies the entire file.
 2. Open the Command Palette (`F1` or `Ctrl+Shift+P`)
 3. Run **"Code Block Copier: Copy Code Block"**
 4. Paste anywhere — the formatted block is in your clipboard

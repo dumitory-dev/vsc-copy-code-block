@@ -15,20 +15,23 @@ export function activate(context: vscode.ExtensionContext) {
 
         const document = editor.document;
         const selection = editor.selection;
-        const selectedText = document.getText(selection);
-        if (!selectedText) {
-            vscode.window.showErrorMessage('No text selected');
-            return;
-        }
+        const hasSelection = !selection.isEmpty;
+        const selectedText = hasSelection
+            ? document.getText(selection)
+            : document.getText();
 
         const filePath = document.uri.fsPath;
         const relativePath = vscode.workspace.asRelativePath(filePath);
-        const startLine = selection.start.line + 1; // VS Code lines are 0-based, display as 1-based
+        const startLine = hasSelection
+            ? selection.start.line + 1
+            : 1; // VS Code lines are 0-based, display as 1-based
 
-        const output = makeCodeBlock(selectedText, relativePath, startLine);
+        const output = selectedText
+            ? makeCodeBlock(selectedText, relativePath, startLine)
+            : `path: ${relativePath}`;
         await vscode.env.clipboard.writeText(output);
 
-        const lineCount = selectedText.split('\n').length;
+        const lineCount = selectedText ? selectedText.split('\n').length : 0;
         vscode.window.showInformationMessage(
             `${lineCount} line${lineCount !== 1 ? 's' : ''} copied with metadata!`
         );
