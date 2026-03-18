@@ -51,6 +51,14 @@
       {
         "command": "vsc-code-block-copier.copyCodeBlockAppend",
         "title": "Code Block Copier: Copy Code Block (Append)"
+      },
+      {
+        "command": "vsc-code-block-copier.copyCodeBlockMarkdown",
+        "title": "Code Block Copier: Copy Code Block (Markdown)"
+      },
+      {
+        "command": "vsc-code-block-copier.copyCodeBlockMarkdownAppend",
+        "title": "Code Block Copier: Copy Code Block (Markdown, Append)"
       }
     ]
   },
@@ -67,7 +75,7 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
-    "@types/node": "20.x",
+    "@types/node": "^20.19.37",
     "@types/vscode": "^1.90.0",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",

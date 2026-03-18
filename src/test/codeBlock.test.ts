@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { makeCodeBlock } from '../codeBlock';
+import { getMarkdownLanguage, makeCodeBlock, makeMarkdownCodeBlock } from '../codeBlock';
 
 suite('makeCodeBlock', () => {
     test('single line includes path header and line number', () => {
@@ -54,5 +54,34 @@ suite('makeCodeBlock', () => {
             '12: }',
         ].join('\n');
         assert.strictEqual(result, expected);
+    });
+});
+
+
+suite('makeMarkdownCodeBlock', () => {
+    test('uses language from file extension when available', () => {
+        const result = makeMarkdownCodeBlock('const x = 1;', 'src/app.ts');
+        const expected = [
+            'path: src/app.ts',
+            '```typescript',
+            'const x = 1;',
+            '```',
+        ].join('\n');
+        assert.strictEqual(result, expected);
+    });
+
+    test('uses plain fence when extension has no known markdown language', () => {
+        const result = makeMarkdownCodeBlock('raw content', 'notes.customext');
+        const expected = [
+            'path: notes.customext',
+            '```',
+            'raw content',
+            '```',
+        ].join('\n');
+        assert.strictEqual(result, expected);
+    });
+
+    test('returns empty language for files without extension', () => {
+        assert.strictEqual(getMarkdownLanguage('Dockerfile'), '');
     });
 });

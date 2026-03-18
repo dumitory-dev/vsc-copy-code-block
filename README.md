@@ -12,6 +12,7 @@ A VS Code extension that lets you copy code blocks with line numbers, file paths
 - **File Path**: Includes the relative file path as a header
 - **Preserved Formatting**: Keeps original indentation and whitespace
 - **Append Mode**: Append new snippets to existing clipboard contents with a blank line separator
+- **Markdown Mode**: Copy fenced Markdown blocks with language tags inferred from file extension
 
 ## Installation
 
@@ -30,6 +31,8 @@ Or install from the [Visual Studio Marketplace](https://marketplace.visualstudio
 4. Paste anywhere — the formatted block is in your clipboard
 
 To accumulate multiple snippets in your clipboard, run **"Code Block Copier: Copy Code Block (Append)"**. The new snippet is appended after previous clipboard content with a blank line separator.
+
+For Markdown output, use **"Code Block Copier: Copy Code Block (Markdown)"** or **"Code Block Copier: Copy Code Block (Markdown, Append)"**. The extension detects the language from the file extension (for example, `.json` → `json`, `.ts` → `typescript`). If the extension is unknown, it falls back to a plain triple-backtick fence without a language tag.
 
 ## Example Output
 
@@ -91,6 +94,19 @@ src/
     ├── codeBlock.test.ts # Unit tests for formatting logic
     └── extension.test.ts # Integration tests (run in VS Code)
 ```
+
+Markdown mode example:
+
+~~~
+path: src/data/user.json
+```json
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "age": 25
+}
+```
+~~~
 
 ## License
 
