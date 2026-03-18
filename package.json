@@ -43,6 +43,12 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "submenus": [
+      {
+        "id": "vsc-code-block-copier.contextSubmenu",
+        "label": "Code Block Copier"
+      }
+    ],
     "commands": [
       {
         "command": "vsc-code-block-copier.copyCodeBlock",
@@ -60,7 +66,34 @@
         "command": "vsc-code-block-copier.copyCodeBlockMarkdownAppend",
         "title": "Code Block Copier: Copy Code Block (Markdown, Append)"
       }
-    ]
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "vsc-code-block-copier.contextSubmenu",
+          "group": "9_cutcopypaste",
+          "when": "editorTextFocus"
+        }
+      ],
+      "vsc-code-block-copier.contextSubmenu": [
+        {
+          "command": "vsc-code-block-copier.copyCodeBlock",
+          "group": "1_main"
+        },
+        {
+          "command": "vsc-code-block-copier.copyCodeBlockAppend",
+          "group": "1_main"
+        },
+        {
+          "command": "vsc-code-block-copier.copyCodeBlockMarkdown",
+          "group": "2_markdown"
+        },
+        {
+          "command": "vsc-code-block-copier.copyCodeBlockMarkdownAppend",
+          "group": "2_markdown"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
