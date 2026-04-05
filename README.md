@@ -39,6 +39,8 @@ When sharing code, context matters. Code Block Copier includes:
 - Append mode to combine snippets with a blank-line separator
 - Markdown mode with language inference from file extension
 - Editor context-menu integration
+- PNG screenshot generation (selection or whole file)
+- Configurable screenshot output folder (`vsc-code-block-copier.screenshotOutputFolder`)
 
 ## Installation
 
@@ -69,12 +71,13 @@ All commands are available from the Command Palette and the editor context menu.
 | `Code Block Copier: Copy Code Block (Append)` | `vsc-code-block-copier.copyCodeBlockAppend` | Same as above, appended to current clipboard |
 | `Code Block Copier: Copy Code Block (Markdown)` | `vsc-code-block-copier.copyCodeBlockMarkdown` | Copy as fenced Markdown block |
 | `Code Block Copier: Copy Code Block (Markdown, Append)` | `vsc-code-block-copier.copyCodeBlockMarkdownAppend` | Markdown output appended to clipboard |
+| `Code Block Copier: Generate Code Screenshot` | `copyCodeBlock.generateScreenshot` | Render selected code (or full file) and save a PNG screenshot |
 
 ## How It Works
 
 1. Select code in an active editor, or leave selection empty to copy the full file.
-2. Run one of the copy commands.
-3. The extension writes formatted output to your clipboard.
+2. Run one of the copy commands or the screenshot command.
+3. The extension writes formatted output to your clipboard (copy commands) or saves a PNG file (screenshot command).
 
 Behavior details:
 
@@ -82,6 +85,10 @@ Behavior details:
 - In line-number mode, start line reflects the original selection line.
 - In append mode, snippets are separated by one blank line.
 - Success notification includes the number of copied lines.
+- Screenshot mode renders styled code with line numbers and syntax highlighting, then saves a PNG file to:
+  - `~/Pictures/Screenshots/vsc-copy-code-block` by default
+  - or your custom folder from `vsc-code-block-copier.screenshotOutputFolder`
+- For large snippets, screenshot mode shows a confirmation prompt before rendering.
 
 ## Output Examples
 
