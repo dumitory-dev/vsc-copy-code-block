@@ -86,7 +86,7 @@ Behavior details:
 - In append mode, snippets are separated by one blank line.
 - Success notification includes the number of copied lines.
 - Screenshot mode renders styled code with line numbers and syntax highlighting, then saves a PNG file to:
-  - `~/Pictures/Screenshots/vsc-copy-code-block` by default
+  - `~/Pictures/vsc-code-block-copier` by default (Linux/macOS: `/home/<user>/Pictures/vsc-code-block-copier`, Windows: `C:\Users\<user>\Pictures\vsc-code-block-copier`)
   - or your custom folder from `vsc-code-block-copier.screenshotOutputFolder`
 - For large snippets, screenshot mode shows a confirmation prompt before rendering.
 

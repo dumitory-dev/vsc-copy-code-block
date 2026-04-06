@@ -24,6 +24,7 @@ async function copyCodeBlock({ append, format }: { append: boolean; format: Copy
     const selectedText = hasSelection
         ? document.getText(selection)
         : document.getText();
+    const normalizedText = normalizeLineEndings(selectedText);
 
     const filePath = document.uri.fsPath;
     const relativePath = vscode.workspace.asRelativePath(filePath);
@@ -31,10 +32,10 @@ async function copyCodeBlock({ append, format }: { append: boolean; format: Copy
         ? selection.start.line + 1
         : 1; // VS Code lines are 0-based, display as 1-based
 
-    const output = selectedText
+    const output = normalizedText
         ? format === 'markdown'
-            ? makeMarkdownCodeBlock(selectedText, relativePath)
-            : makeCodeBlock(selectedText, relativePath, startLine)
+            ? makeMarkdownCodeBlock(normalizedText, relativePath)
+            : makeCodeBlock(normalizedText, relativePath, startLine)
         : `path: ${relativePath}`;
 
     if (append) {
@@ -45,7 +46,7 @@ async function copyCodeBlock({ append, format }: { append: boolean; format: Copy
         await vscode.env.clipboard.writeText(output);
     }
 
-    const lineCount = selectedText ? selectedText.split('\n').length : 0;
+    const lineCount = normalizedText ? normalizedText.split('\n').length : 0;
     vscode.window.showInformationMessage(
         `${lineCount} line${lineCount !== 1 ? 's' : ''} copied with metadata${append ? ' (appended to clipboard)' : ''}!`
     );
@@ -82,3 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
+
+function normalizeLineEndings(value: string): string {
+    return value.replace(/\r\n?/g, '\n');
+}

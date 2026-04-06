@@ -20,15 +20,16 @@ export async function generateCodeScreenshot(): Promise<void> {
     const selection = editor.selection;
     const hasSelection = !selection.isEmpty;
     const code = hasSelection ? editor.document.getText(selection) : editor.document.getText();
+    const normalizedCode = normalizeLineEndings(code);
     const startLine = hasSelection ? selection.start.line + 1 : 1;
     const languageId = editor.document.languageId;
 
-    if (!code.trim()) {
+    if (!normalizedCode.trim()) {
         vscode.window.showErrorMessage('No code to render. Select some code or use a non-empty file.');
         return;
     }
 
-    const shouldContinue = await confirmLargeRender(code);
+    const shouldContinue = await confirmLargeRender(normalizedCode);
     if (!shouldContinue) {
         return;
     }
@@ -36,7 +37,7 @@ export async function generateCodeScreenshot(): Promise<void> {
     const fileName = path.basename(editor.document.fileName || 'untitled');
 
     try {
-        const dataUrl = await renderCodeToPngInWebview(code, fileName, startLine, languageId);
+        const dataUrl = await renderCodeToPngInWebview(normalizedCode, fileName, startLine, languageId);
         const outputFolder = await resolveScreenshotOutputFolder();
         const outputPath = await writePngDataUrlToFile(dataUrl, outputFolder);
 
@@ -337,4 +338,8 @@ function escapeHtml(value: string): string {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+}
+
+function normalizeLineEndings(value: string): string {
+    return value.replace(/\r\n?/g, '\n');
 }
