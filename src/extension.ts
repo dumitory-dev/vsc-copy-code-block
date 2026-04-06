@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 import { makeCodeBlock, makeMarkdownCodeBlock } from './codeBlock';
 import { appendToClipboard } from './clipboard';
+import { generateCodeScreenshot } from './screenshot';
 
 const COPY_CODE_BLOCK_COMMAND = 'vsc-code-block-copier.copyCodeBlock';
 const COPY_CODE_BLOCK_APPEND_COMMAND = 'vsc-code-block-copier.copyCodeBlockAppend';
 const COPY_CODE_BLOCK_MARKDOWN_COMMAND = 'vsc-code-block-copier.copyCodeBlockMarkdown';
 const COPY_CODE_BLOCK_MARKDOWN_APPEND_COMMAND = 'vsc-code-block-copier.copyCodeBlockMarkdownAppend';
+const GENERATE_SCREENSHOT_COMMAND = 'copyCodeBlock.generateScreenshot';
 
 type CopyFormat = 'lineNumbers' | 'markdown';
 
@@ -22,6 +24,7 @@ async function copyCodeBlock({ append, format }: { append: boolean; format: Copy
     const selectedText = hasSelection
         ? document.getText(selection)
         : document.getText();
+    const normalizedText = normalizeLineEndings(selectedText);
 
     const filePath = document.uri.fsPath;
     const relativePath = vscode.workspace.asRelativePath(filePath);
@@ -29,10 +32,10 @@ async function copyCodeBlock({ append, format }: { append: boolean; format: Copy
         ? selection.start.line + 1
         : 1; // VS Code lines are 0-based, display as 1-based
 
-    const output = selectedText
+    const output = normalizedText
         ? format === 'markdown'
-            ? makeMarkdownCodeBlock(selectedText, relativePath)
-            : makeCodeBlock(selectedText, relativePath, startLine)
+            ? makeMarkdownCodeBlock(normalizedText, relativePath)
+            : makeCodeBlock(normalizedText, relativePath, startLine)
         : `path: ${relativePath}`;
 
     if (append) {
@@ -43,7 +46,7 @@ async function copyCodeBlock({ append, format }: { append: boolean; format: Copy
         await vscode.env.clipboard.writeText(output);
     }
 
-    const lineCount = selectedText ? selectedText.split('\n').length : 0;
+    const lineCount = normalizedText ? normalizedText.split('\n').length : 0;
     vscode.window.showInformationMessage(
         `${lineCount} line${lineCount !== 1 ? 's' : ''} copied with metadata${append ? ' (appended to clipboard)' : ''}!`
     );
@@ -68,10 +71,19 @@ export function activate(context: vscode.ExtensionContext) {
         await copyCodeBlock({ append: true, format: 'markdown' });
     });
 
+    const screenshotDisposable = vscode.commands.registerCommand(GENERATE_SCREENSHOT_COMMAND, async () => {
+        await generateCodeScreenshot();
+    });
+
     context.subscriptions.push(disposable);
     context.subscriptions.push(appendDisposable);
     context.subscriptions.push(markdownDisposable);
     context.subscriptions.push(markdownAppendDisposable);
+    context.subscriptions.push(screenshotDisposable);
 }
 
 export function deactivate() {}
+
+function normalizeLineEndings(value: string): string {
+    return value.replace(/\r\n?/g, '\n');
+}

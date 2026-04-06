@@ -3,7 +3,8 @@ export function makeCodeBlock(
     filePath: string,
     startLine: number,
 ): string {
-    const codeLines = code.split('\n');
+    const normalizedCode = normalizeLineEndings(code);
+    const codeLines = normalizedCode.split('\n');
     const maxLineNumber = startLine + codeLines.length - 1;
     const maxPadding = maxLineNumber.toString().length;
 
@@ -57,8 +58,13 @@ export function getMarkdownLanguage(filePath: string): string {
 }
 
 export function makeMarkdownCodeBlock(code: string, filePath: string): string {
+    const normalizedCode = normalizeLineEndings(code);
     const language = getMarkdownLanguage(filePath);
     const openingFence = language ? `\`\`\`${language}` : '```';
 
-    return [`path: ${filePath}`, openingFence, code, '```'].join('\n');
+    return [`path: ${filePath}`, openingFence, normalizedCode, '```'].join('\n');
+}
+
+function normalizeLineEndings(value: string): string {
+    return value.replace(/\r\n?/g, '\n');
 }
