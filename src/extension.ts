@@ -1,13 +1,14 @@
 import * as vscode from 'vscode';
 import { makeCodeBlock, makeMarkdownCodeBlock } from './codeBlock';
 import { appendToClipboard } from './clipboard';
-import { generateCodeScreenshot } from './screenshot';
+import { generateCodeScreenshot, setScreenshotOutputFolder } from './screenshot';
 
 const COPY_CODE_BLOCK_COMMAND = 'vsc-code-block-copier.copyCodeBlock';
 const COPY_CODE_BLOCK_APPEND_COMMAND = 'vsc-code-block-copier.copyCodeBlockAppend';
 const COPY_CODE_BLOCK_MARKDOWN_COMMAND = 'vsc-code-block-copier.copyCodeBlockMarkdown';
 const COPY_CODE_BLOCK_MARKDOWN_APPEND_COMMAND = 'vsc-code-block-copier.copyCodeBlockMarkdownAppend';
 const GENERATE_SCREENSHOT_COMMAND = 'copyCodeBlock.generateScreenshot';
+const SET_SCREENSHOT_FOLDER_COMMAND = 'vsc-code-block-copier.setScreenshotOutputFolder';
 
 type CopyFormat = 'lineNumbers' | 'markdown';
 
@@ -75,11 +76,16 @@ export function activate(context: vscode.ExtensionContext) {
         await generateCodeScreenshot();
     });
 
+    const setScreenshotFolderDisposable = vscode.commands.registerCommand(SET_SCREENSHOT_FOLDER_COMMAND, async () => {
+        await setScreenshotOutputFolder();
+    });
+
     context.subscriptions.push(disposable);
     context.subscriptions.push(appendDisposable);
     context.subscriptions.push(markdownDisposable);
     context.subscriptions.push(markdownAppendDisposable);
     context.subscriptions.push(screenshotDisposable);
+    context.subscriptions.push(setScreenshotFolderDisposable);
 }
 
 export function deactivate() {}

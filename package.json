@@ -49,7 +49,7 @@
         "vsc-code-block-copier.screenshotOutputFolder": {
           "type": "string",
           "default": "",
-          "description": "Folder where generated screenshots are saved. If empty, screenshots are saved to ~/Pictures/vsc-code-block-copier."
+          "markdownDescription": "Folder where generated screenshots are saved. If empty, screenshots are saved to `~/Pictures/vsc-code-block-copier`.\n\n**Tip:** run the command **Code Block Copier: Set Screenshot Output Folder** to pick a folder visually instead of typing the path."
         }
       }
     },
@@ -79,6 +79,10 @@
       {
         "command": "copyCodeBlock.generateScreenshot",
         "title": "Code Block Copier: Generate Code Screenshot"
+      },
+      {
+        "command": "vsc-code-block-copier.setScreenshotOutputFolder",
+        "title": "Code Block Copier: Set Screenshot Output Folder"
       }
     ],
     "menus": {

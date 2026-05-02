@@ -41,11 +41,88 @@ export async function generateCodeScreenshot(): Promise<void> {
         const outputFolder = await resolveScreenshotOutputFolder();
         const outputPath = await writePngDataUrlToFile(dataUrl, outputFolder);
 
-        vscode.window.showInformationMessage(`Code screenshot saved: ${outputPath}`);
+        const action = await vscode.window.showInformationMessage(
+            `Code screenshot saved: ${outputPath}`,
+            'Reveal in Explorer',
+            'Open Image',
+            'Change Folder…',
+        );
+
+        if (action === 'Reveal in Explorer') {
+            await vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(outputPath));
+        } else if (action === 'Open Image') {
+            await vscode.commands.executeCommand('vscode.open', vscode.Uri.file(outputPath));
+        } else if (action === 'Change Folder…') {
+            await setScreenshotOutputFolder();
+        }
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown render error';
         vscode.window.showErrorMessage(`Failed to generate screenshot: ${message}`);
     }
+}
+
+export async function setScreenshotOutputFolder(): Promise<void> {
+    const currentValue = vscode.workspace
+        .getConfiguration(CONFIG_SECTION)
+        .get<string>(SCREENSHOT_OUTPUT_FOLDER_KEY, '')
+        .trim();
+
+    const defaultUri = currentValue && path.isAbsolute(currentValue)
+        ? vscode.Uri.file(currentValue)
+        : vscode.Uri.file(path.join(os.homedir(), 'Pictures'));
+
+    const picked = await vscode.window.showOpenDialog({
+        canSelectFiles: false,
+        canSelectFolders: true,
+        canSelectMany: false,
+        defaultUri,
+        openLabel: 'Use This Folder',
+        title: 'Choose where to save code screenshots',
+    });
+
+    if (!picked || picked.length === 0) {
+        return;
+    }
+
+    const folderPath = picked[0].fsPath;
+    const target = await pickConfigurationTarget();
+    if (target === undefined) {
+        return;
+    }
+
+    await vscode.workspace
+        .getConfiguration(CONFIG_SECTION)
+        .update(SCREENSHOT_OUTPUT_FOLDER_KEY, folderPath, target);
+
+    const scopeLabel = target === vscode.ConfigurationTarget.Workspace ? 'workspace' : 'user';
+    vscode.window.showInformationMessage(
+        `Screenshots will be saved to: ${folderPath} (${scopeLabel} settings)`,
+    );
+}
+
+async function pickConfigurationTarget(): Promise<vscode.ConfigurationTarget | undefined> {
+    const hasWorkspace = !!vscode.workspace.workspaceFolders?.length;
+    if (!hasWorkspace) {
+        return vscode.ConfigurationTarget.Global;
+    }
+
+    const choice = await vscode.window.showQuickPick(
+        [
+            {
+                label: 'User Settings',
+                description: 'Apply to all projects',
+                target: vscode.ConfigurationTarget.Global,
+            },
+            {
+                label: 'Workspace Settings',
+                description: 'Apply only to this project',
+                target: vscode.ConfigurationTarget.Workspace,
+            },
+        ],
+        { placeHolder: 'Where should this folder setting be saved?' },
+    );
+
+    return choice?.target;
 }
 
 async function confirmLargeRender(code: string): Promise<boolean> {
