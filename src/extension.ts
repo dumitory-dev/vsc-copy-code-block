@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { makeCodeBlock, makeMarkdownCodeBlock } from './codeBlock';
 import { appendToClipboard } from './clipboard';
-import { generateCodeScreenshot, setScreenshotOutputFolder } from './screenshot';
+import { generateCodeScreenshot, openScreenshotThemePicker, setScreenshotOutputFolder } from './screenshot';
 
 const COPY_CODE_BLOCK_COMMAND = 'vsc-code-block-copier.copyCodeBlock';
 const COPY_CODE_BLOCK_APPEND_COMMAND = 'vsc-code-block-copier.copyCodeBlockAppend';
@@ -9,6 +9,7 @@ const COPY_CODE_BLOCK_MARKDOWN_COMMAND = 'vsc-code-block-copier.copyCodeBlockMar
 const COPY_CODE_BLOCK_MARKDOWN_APPEND_COMMAND = 'vsc-code-block-copier.copyCodeBlockMarkdownAppend';
 const GENERATE_SCREENSHOT_COMMAND = 'copyCodeBlock.generateScreenshot';
 const SET_SCREENSHOT_FOLDER_COMMAND = 'vsc-code-block-copier.setScreenshotOutputFolder';
+const OPEN_SCREENSHOT_THEME_PICKER_COMMAND = 'vsc-code-block-copier.openScreenshotThemePicker';
 
 type CopyFormat = 'lineNumbers' | 'markdown';
 
@@ -80,12 +81,17 @@ export function activate(context: vscode.ExtensionContext) {
         await setScreenshotOutputFolder();
     });
 
+    const openThemePickerDisposable = vscode.commands.registerCommand(OPEN_SCREENSHOT_THEME_PICKER_COMMAND, async () => {
+        await openScreenshotThemePicker();
+    });
+
     context.subscriptions.push(disposable);
     context.subscriptions.push(appendDisposable);
     context.subscriptions.push(markdownDisposable);
     context.subscriptions.push(markdownAppendDisposable);
     context.subscriptions.push(screenshotDisposable);
     context.subscriptions.push(setScreenshotFolderDisposable);
+    context.subscriptions.push(openThemePickerDisposable);
 }
 
 export function deactivate() {}

@@ -8,6 +8,151 @@ const LARGE_FILE_LINE_THRESHOLD = 1_500;
 const RENDER_TIMEOUT_MS = 20_000;
 const CONFIG_SECTION = 'vsc-code-block-copier';
 const SCREENSHOT_OUTPUT_FOLDER_KEY = 'screenshotOutputFolder';
+const SCREENSHOT_THEME_KEY = 'screenshotTheme';
+const DEFAULT_THEME_ID = 'vscode-dark';
+
+type ScreenshotTheme = {
+    label: string;
+    description: string;
+    background: string;
+    border: string;
+    headerBackground: string;
+    headerText: string;
+    codeText: string;
+    lineNumber: string;
+    hljsStylesheet: string;
+};
+
+const SCREENSHOT_THEMES: Record<string, ScreenshotTheme> = {
+    'vscode-dark': {
+        label: 'VS Code Dark',
+        description: 'Default — matches the VS Code editor',
+        background: '#1e1e1e',
+        border: '#2d2d2d',
+        headerBackground: '#252526',
+        headerText: '#cccccc',
+        codeText: '#d4d4d4',
+        lineNumber: '#858585',
+        hljsStylesheet: 'vs2015.min.css',
+    },
+    'vscode-light': {
+        label: 'VS Code Light',
+        description: 'Clean light theme, good for printed docs',
+        background: '#ffffff',
+        border: '#e1e4e8',
+        headerBackground: '#f3f3f3',
+        headerText: '#333333',
+        codeText: '#000000',
+        lineNumber: '#237893',
+        hljsStylesheet: 'vs.min.css',
+    },
+    'github-dark': {
+        label: 'GitHub Dark',
+        description: "Matches GitHub's dark mode",
+        background: '#0d1117',
+        border: '#30363d',
+        headerBackground: '#161b22',
+        headerText: '#c9d1d9',
+        codeText: '#c9d1d9',
+        lineNumber: '#6e7681',
+        hljsStylesheet: 'github-dark.min.css',
+    },
+    'github-light': {
+        label: 'GitHub Light',
+        description: "Matches GitHub's light mode",
+        background: '#ffffff',
+        border: '#d0d7de',
+        headerBackground: '#f6f8fa',
+        headerText: '#24292f',
+        codeText: '#24292f',
+        lineNumber: '#8c959f',
+        hljsStylesheet: 'github.min.css',
+    },
+    'monokai': {
+        label: 'Monokai',
+        description: 'Classic warm dark theme',
+        background: '#272822',
+        border: '#3e3d32',
+        headerBackground: '#1e1f1c',
+        headerText: '#f8f8f2',
+        codeText: '#f8f8f2',
+        lineNumber: '#75715e',
+        hljsStylesheet: 'monokai.min.css',
+    },
+    'dracula': {
+        label: 'Dracula',
+        description: 'Popular purple-tinted dark theme',
+        background: '#282a36',
+        border: '#44475a',
+        headerBackground: '#21222c',
+        headerText: '#f8f8f2',
+        codeText: '#f8f8f2',
+        lineNumber: '#6272a4',
+        hljsStylesheet: 'base16/dracula.min.css',
+    },
+    'nord': {
+        label: 'Nord',
+        description: 'Cool arctic dark theme',
+        background: '#2e3440',
+        border: '#3b4252',
+        headerBackground: '#3b4252',
+        headerText: '#eceff4',
+        codeText: '#d8dee9',
+        lineNumber: '#4c566a',
+        hljsStylesheet: 'nord.min.css',
+    },
+    'solarized-dark': {
+        label: 'Solarized Dark',
+        description: 'Ethan Schoonover’s low-contrast dark palette',
+        background: '#002b36',
+        border: '#073642',
+        headerBackground: '#073642',
+        headerText: '#93a1a1',
+        codeText: '#839496',
+        lineNumber: '#586e75',
+        hljsStylesheet: 'base16/solarized-dark.min.css',
+    },
+    'solarized-light': {
+        label: 'Solarized Light',
+        description: 'Ethan Schoonover’s low-contrast light palette',
+        background: '#fdf6e3',
+        border: '#eee8d5',
+        headerBackground: '#eee8d5',
+        headerText: '#586e75',
+        codeText: '#657b83',
+        lineNumber: '#93a1a1',
+        hljsStylesheet: 'base16/solarized-light.min.css',
+    },
+    'one-dark': {
+        label: 'Atom One Dark',
+        description: 'Atom editor’s dark theme',
+        background: '#282c34',
+        border: '#3e4451',
+        headerBackground: '#21252b',
+        headerText: '#abb2bf',
+        codeText: '#abb2bf',
+        lineNumber: '#5c6370',
+        hljsStylesheet: 'atom-one-dark.min.css',
+    },
+    'one-light': {
+        label: 'Atom One Light',
+        description: 'Atom editor’s light theme',
+        background: '#fafafa',
+        border: '#e5e5e6',
+        headerBackground: '#eaeaeb',
+        headerText: '#383a42',
+        codeText: '#383a42',
+        lineNumber: '#9d9d9f',
+        hljsStylesheet: 'atom-one-light.min.css',
+    },
+};
+
+function getActiveTheme(): ScreenshotTheme {
+    const id = vscode.workspace
+        .getConfiguration(CONFIG_SECTION)
+        .get<string>(SCREENSHOT_THEME_KEY, DEFAULT_THEME_ID);
+    return SCREENSHOT_THEMES[id] ?? SCREENSHOT_THEMES[DEFAULT_THEME_ID];
+}
 
 export async function generateCodeScreenshot(): Promise<void> {
     const editor = vscode.window.activeTextEditor;
@@ -37,7 +182,8 @@ export async function generateCodeScreenshot(): Promise<void> {
     const fileName = path.basename(editor.document.fileName || 'untitled');
 
     try {
-        const dataUrl = await renderCodeToPngInWebview(normalizedCode, fileName, startLine, languageId);
+        const theme = getActiveTheme();
+        const dataUrl = await renderCodeToPngInWebview(normalizedCode, fileName, startLine, languageId, theme);
         const outputFolder = await resolveScreenshotOutputFolder();
         const outputPath = await writePngDataUrlToFile(dataUrl, outputFolder);
 
@@ -100,6 +246,331 @@ export async function setScreenshotOutputFolder(): Promise<void> {
     );
 }
 
+export async function openScreenshotThemePicker(): Promise<void> {
+    const panel = vscode.window.createWebviewPanel(
+        'codeBlockCopierThemePicker',
+        'Code Block Copier — Choose Screenshot Theme',
+        vscode.ViewColumn.Active,
+        { enableScripts: true, retainContextWhenHidden: true },
+    );
+
+    const hasWorkspace = !!vscode.workspace.workspaceFolders?.length;
+    panel.webview.html = buildThemePickerHtml(getCurrentThemeId(), hasWorkspace);
+
+    panel.webview.onDidReceiveMessage(async (message: unknown) => {
+        if (!isPickerMessage(message)) {
+            return;
+        }
+
+        if (message.type === 'select') {
+            if (!SCREENSHOT_THEMES[message.themeId]) {
+                return;
+            }
+
+            const target = message.scope === 'workspace' && hasWorkspace
+                ? vscode.ConfigurationTarget.Workspace
+                : vscode.ConfigurationTarget.Global;
+
+            await vscode.workspace
+                .getConfiguration(CONFIG_SECTION)
+                .update(SCREENSHOT_THEME_KEY, message.themeId, target);
+
+            panel.webview.postMessage({ type: 'saved', themeId: message.themeId, scope: message.scope });
+        }
+    });
+}
+
+function getCurrentThemeId(): string {
+    return vscode.workspace
+        .getConfiguration(CONFIG_SECTION)
+        .get<string>(SCREENSHOT_THEME_KEY, DEFAULT_THEME_ID);
+}
+
+type PickerMessage = { type: 'select'; themeId: string; scope: 'user' | 'workspace' };
+
+function isPickerMessage(message: unknown): message is PickerMessage {
+    if (!message || typeof message !== 'object') {
+        return false;
+    }
+    const candidate = message as { type?: unknown; themeId?: unknown; scope?: unknown };
+    return (
+        candidate.type === 'select' &&
+        typeof candidate.themeId === 'string' &&
+        (candidate.scope === 'user' || candidate.scope === 'workspace')
+    );
+}
+
+function buildThemePickerHtml(currentThemeId: string, hasWorkspace: boolean): string {
+    const cards = Object.entries(SCREENSHOT_THEMES)
+        .map(([id, theme]) => renderThemeCard(id, theme, id === currentThemeId))
+        .join('\n');
+
+    const workspaceButton = hasWorkspace
+        ? `<button type="button" class="scope-btn" data-scope="workspace">Workspace Settings</button>`
+        : `<button type="button" class="scope-btn" data-scope="workspace" disabled title="No workspace open">Workspace Settings</button>`;
+
+    return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: var(--vscode-font-family);
+      color: var(--vscode-foreground);
+      background: var(--vscode-editor-background);
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .subtitle {
+      margin: 0 0 20px;
+      color: var(--vscode-descriptionForeground);
+      font-size: 13px;
+    }
+    .scope {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      padding: 12px 14px;
+      background: var(--vscode-editorWidget-background);
+      border: 1px solid var(--vscode-widget-border, var(--vscode-editorWidget-border, transparent));
+      border-radius: 4px;
+    }
+    .scope-label {
+      font-size: 12px;
+      color: var(--vscode-descriptionForeground);
+      margin-right: 4px;
+    }
+    .scope-btn {
+      padding: 4px 12px;
+      font-size: 12px;
+      border: 1px solid var(--vscode-button-border, transparent);
+      border-radius: 3px;
+      background: transparent;
+      color: var(--vscode-foreground);
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .scope-btn:hover:not(:disabled) {
+      background: var(--vscode-toolbar-hoverBackground);
+    }
+    .scope-btn.active {
+      background: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
+      border-color: var(--vscode-button-background);
+    }
+    .scope-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      position: relative;
+      display: block;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      padding: 10px;
+      background: var(--vscode-editorWidget-background);
+      transition: border-color 0.15s, transform 0.05s;
+    }
+    .card:hover {
+      border-color: var(--vscode-focusBorder);
+    }
+    .card:active {
+      transform: scale(0.99);
+    }
+    .card.selected {
+      border-color: var(--vscode-focusBorder);
+      box-shadow: 0 0 0 1px var(--vscode-focusBorder);
+    }
+    .card input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .radio-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--vscode-input-border, var(--vscode-foreground));
+      flex-shrink: 0;
+      position: relative;
+    }
+    .card.selected .radio-dot {
+      border-color: var(--vscode-focusBorder);
+    }
+    .card.selected .radio-dot::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--vscode-focusBorder);
+    }
+    .name-block {
+      flex: 1;
+      margin-left: 10px;
+    }
+    .name {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .desc {
+      font-size: 11px;
+      color: var(--vscode-descriptionForeground);
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+    .saved-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: var(--vscode-badge-background);
+      color: var(--vscode-badge-foreground);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .card.just-saved .saved-tag {
+      opacity: 1;
+    }
+    .preview {
+      border: 1px solid var(--preview-border);
+      border-radius: 3px;
+      overflow: hidden;
+      font-family: Consolas, "Courier New", monospace;
+    }
+    .preview-header {
+      padding: 4px 8px;
+      font-size: 10px;
+      border-bottom: 1px solid var(--preview-border);
+    }
+    .preview-code {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .preview-ln { text-align: right; }
+    .swatches {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid var(--vscode-widget-border, transparent);
+    }
+  </style>
+</head>
+<body>
+  <h1>Choose Screenshot Theme</h1>
+  <p class="subtitle">Pick a color palette for generated code screenshots. Selection saves automatically.</p>
+
+  <div class="scope">
+    <span class="scope-label">Save to:</span>
+    <button type="button" class="scope-btn active" data-scope="user">User Settings</button>
+    ${workspaceButton}
+  </div>
+
+  <div class="grid">
+${cards}
+  </div>
+
+  <script>
+    const vscode = acquireVsCodeApi();
+    let scope = 'user';
+
+    document.querySelectorAll('.scope-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        document.querySelectorAll('.scope-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        scope = btn.dataset.scope;
+      });
+    });
+
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => {
+        const themeId = card.dataset.themeId;
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected', 'just-saved'));
+        card.classList.add('selected');
+        vscode.postMessage({ type: 'select', themeId, scope });
+      });
+    });
+
+    window.addEventListener('message', event => {
+      const msg = event.data;
+      if (msg && msg.type === 'saved') {
+        const card = document.querySelector('.card[data-theme-id="' + msg.themeId + '"]');
+        if (!card) return;
+        card.classList.add('just-saved');
+        setTimeout(() => card.classList.remove('just-saved'), 1500);
+      }
+    });
+  </script>
+</body>
+</html>`;
+}
+
+function renderThemeCard(id: string, theme: ScreenshotTheme, isCurrent: boolean): string {
+    const selectedClass = isCurrent ? ' selected' : '';
+    const checked = isCurrent ? ' checked' : '';
+
+    return `    <div class="card${selectedClass}" data-theme-id="${id}" style="--preview-border: ${theme.border};">
+      <input type="radio" name="theme" value="${id}"${checked} />
+      <div class="card-head">
+        <div class="radio-dot"></div>
+        <div class="name-block">
+          <div class="name">${escapeHtml(theme.label)}</div>
+          <div class="desc">${escapeHtml(theme.description)}</div>
+        </div>
+        <span class="saved-tag">Saved ✓</span>
+      </div>
+      <div class="preview" style="background: ${theme.background};">
+        <div class="preview-header" style="background: ${theme.headerBackground}; color: ${theme.headerText};">example.ts</div>
+        <div class="preview-code">
+          <span class="preview-ln" style="color: ${theme.lineNumber};">1</span>
+          <span style="color: ${theme.codeText};">function hello() {</span>
+          <span class="preview-ln" style="color: ${theme.lineNumber};">2</span>
+          <span style="color: ${theme.codeText};">  return "hi";</span>
+          <span class="preview-ln" style="color: ${theme.lineNumber};">3</span>
+          <span style="color: ${theme.codeText};">}</span>
+        </div>
+      </div>
+      <div class="swatches">
+        <div class="swatch" style="background: ${theme.background};" title="Background"></div>
+        <div class="swatch" style="background: ${theme.headerBackground};" title="Header"></div>
+        <div class="swatch" style="background: ${theme.codeText};" title="Code text"></div>
+        <div class="swatch" style="background: ${theme.lineNumber};" title="Line numbers"></div>
+        <div class="swatch" style="background: ${theme.border};" title="Border"></div>
+      </div>
+    </div>`;
+}
+
 async function pickConfigurationTarget(): Promise<vscode.ConfigurationTarget | undefined> {
     const hasWorkspace = !!vscode.workspace.workspaceFolders?.length;
     if (!hasWorkspace) {
@@ -147,6 +618,7 @@ async function renderCodeToPngInWebview(
     fileName: string,
     startLine: number,
     languageId: string,
+    theme: ScreenshotTheme,
 ): Promise<string> {
     const panel = vscode.window.createWebviewPanel(
         'copyCodeBlockScreenshot',
@@ -155,7 +627,7 @@ async function renderCodeToPngInWebview(
         { enableScripts: true },
     );
 
-    panel.webview.html = buildRenderHtml(code, fileName, startLine, languageId);
+    panel.webview.html = buildRenderHtml(code, fileName, startLine, languageId, theme);
 
     return await new Promise<string>((resolve, reject) => {
         let settled = false;
@@ -227,22 +699,29 @@ function isRenderMessage(message: unknown): message is RenderMessage {
     return candidate.type === 'render:success' || candidate.type === 'render:error';
 }
 
-function buildRenderHtml(code: string, fileName: string, startLine: number, languageId: string): string {
+function buildRenderHtml(
+    code: string,
+    fileName: string,
+    startLine: number,
+    languageId: string,
+    theme: ScreenshotTheme,
+): string {
     const escapedFileName = escapeHtml(fileName);
     const codeJson = JSON.stringify(code);
     const languageJson = JSON.stringify(languageId);
+    const stylesheetUrl = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/${theme.hljsStylesheet}`;
+    const backgroundJson = JSON.stringify(theme.background);
 
     return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/vs2015.min.css" />
+  <link rel="stylesheet" href="${stylesheetUrl}" />
   <style>
-    :root { color-scheme: dark; }
     body {
       margin: 0;
-      background: #1e1e1e;
+      background: ${theme.background};
       display: flex;
       justify-content: center;
       align-items: flex-start;
@@ -252,20 +731,20 @@ function buildRenderHtml(code: string, fileName: string, startLine: number, lang
     .card {
       width: max-content;
       border-radius: 0;
-      background: #1e1e1e;
-      border: 1px solid #2d2d2d;
+      background: ${theme.background};
+      border: 1px solid ${theme.border};
       overflow: visible;
     }
     .header {
-      background: #252526;
-      color: #cccccc;
+      background: ${theme.headerBackground};
+      color: ${theme.headerText};
       padding: 8px 12px;
-      border-bottom: 1px solid #2d2d2d;
+      border-bottom: 1px solid ${theme.border};
       font-size: 12px;
     }
     .code {
       margin: 0;
-      color: #d4d4d4;
+      color: ${theme.codeText};
       background: transparent;
       font-size: 14px;
       line-height: 1.45;
@@ -279,11 +758,11 @@ function buildRenderHtml(code: string, fileName: string, startLine: number, lang
     }
     .line-number {
       text-align: right;
-      color: #858585;
+      color: ${theme.lineNumber};
       user-select: none;
     }
     .line-code {
-      color: #d4d4d4;
+      color: ${theme.codeText};
     }
     .line-code .hljs {
       color: inherit;
@@ -306,6 +785,7 @@ function buildRenderHtml(code: string, fileName: string, startLine: number, lang
     const rawCode = ${codeJson};
     const startLine = ${startLine};
     const languageId = ${languageJson};
+    const backgroundColor = ${backgroundJson};
 
     function escapeHtml(value) {
       return value
@@ -350,7 +830,7 @@ function buildRenderHtml(code: string, fileName: string, startLine: number, lang
         const height = node.scrollHeight;
 
         const dataUrl = await window.htmlToImage.toPng(node, {
-          backgroundColor: '#1e1e1e',
+          backgroundColor,
           pixelRatio: 2,
           width,
           height,
