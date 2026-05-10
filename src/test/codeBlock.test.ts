@@ -59,23 +59,37 @@ suite('makeCodeBlock', () => {
 
 
 suite('makeMarkdownCodeBlock', () => {
-    test('uses language from file extension when available', () => {
-        const result = makeMarkdownCodeBlock('const x = 1;', 'src/app.ts');
+    test('uses language from file extension and includes line numbers', () => {
+        const result = makeMarkdownCodeBlock('const x = 1;', 'src/app.ts', 5);
         const expected = [
             'path: src/app.ts',
             '```typescript',
-            'const x = 1;',
+            '5: const x = 1;',
             '```',
         ].join('\n');
         assert.strictEqual(result, expected);
     });
 
     test('uses plain fence when extension has no known markdown language', () => {
-        const result = makeMarkdownCodeBlock('raw content', 'notes.customext');
+        const result = makeMarkdownCodeBlock('raw content', 'notes.customext', 1);
         const expected = [
             'path: notes.customext',
             '```',
-            'raw content',
+            '1: raw content',
+            '```',
+        ].join('\n');
+        assert.strictEqual(result, expected);
+    });
+
+    test('right-pads multi-line line numbers across digit boundaries', () => {
+        const code = 'line a\nline b\nline c';
+        const result = makeMarkdownCodeBlock(code, 'src/index.ts', 9);
+        const expected = [
+            'path: src/index.ts',
+            '```typescript',
+            ' 9: line a',
+            '10: line b',
+            '11: line c',
             '```',
         ].join('\n');
         assert.strictEqual(result, expected);
