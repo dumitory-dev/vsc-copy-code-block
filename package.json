@@ -191,5 +191,9 @@
     "untrustedWorkspaces": {
       "supported": true
     }
+  },
+  "dependencies": {
+    "@resvg/resvg-wasm": "^2.6.2",
+    "highlight.js": "^11.11.1"
   }
 }

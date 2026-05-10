@@ -39,8 +39,11 @@ When sharing code, context matters. Code Block Copier includes:
 - Append mode to combine snippets with a blank-line separator
 - Markdown mode with language inference from file extension
 - Editor context-menu integration
-- PNG screenshot generation (selection or whole file)
+- PNG screenshot generation (selection or whole file) with syntax highlighting
+- 11 built-in screenshot themes (VS Code Dark/Light, GitHub Dark/Light, Monokai, Dracula, Nord, Solarized Dark/Light, Atom One Dark/Light)
+- Visual theme picker with live previews (`vsc-code-block-copier.screenshotTheme`)
 - Configurable screenshot output folder (`vsc-code-block-copier.screenshotOutputFolder`)
+- Headless rendering pipeline — no flashing webview window when generating screenshots
 
 ## Installation
 
@@ -63,7 +66,7 @@ npm install
 
 ## Commands
 
-All commands are available from the Command Palette and the editor context menu.
+Copy commands are available from the Command Palette and the editor context menu. Settings commands are available from the Command Palette only.
 
 | Command Palette Title | Command ID | Description |
 | --- | --- | --- |
@@ -72,6 +75,14 @@ All commands are available from the Command Palette and the editor context menu.
 | `Code Block Copier: Copy Code Block (Markdown)` | `vsc-code-block-copier.copyCodeBlockMarkdown` | Copy as fenced Markdown block |
 | `Code Block Copier: Copy Code Block (Markdown, Append)` | `vsc-code-block-copier.copyCodeBlockMarkdownAppend` | Markdown output appended to clipboard |
 | `Code Block Copier: Generate Code Screenshot` | `copyCodeBlock.generateScreenshot` | Render selected code (or full file) and save a PNG screenshot |
+| `Code Block Copier: Set Screenshot Output Folder` | `vsc-code-block-copier.setScreenshotOutputFolder` | Pick the screenshot output folder via a native dialog (saves to user or workspace settings) |
+
+## Settings
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `vsc-code-block-copier.screenshotOutputFolder` | `""` | Folder for saved screenshots. Empty falls back to `~/Pictures/vsc-code-block-copier`. |
+| `vsc-code-block-copier.screenshotTheme` | `vscode-dark` | Color palette used when rendering screenshots. Open the linked visual picker for live previews. |
 
 ## How It Works
 
@@ -85,9 +96,10 @@ Behavior details:
 - In line-number mode, start line reflects the original selection line.
 - In append mode, snippets are separated by one blank line.
 - Success notification includes the number of copied lines.
-- Screenshot mode renders styled code with line numbers and syntax highlighting, then saves a PNG file to:
+- Screenshot mode renders styled code with line numbers and syntax highlighting in a headless Node pipeline (`highlight.js` → SVG → PNG via `@resvg/resvg-wasm`), then saves a PNG to:
   - `~/Pictures/vsc-code-block-copier` by default (Linux/macOS: `/home/<user>/Pictures/vsc-code-block-copier`, Windows: `C:\Users\<user>\Pictures\vsc-code-block-copier`)
   - or your custom folder from `vsc-code-block-copier.screenshotOutputFolder`
+- Screenshot rendering picks up a system monospace font automatically (Consolas on Windows, Menlo/Monaco on macOS, DejaVu/Liberation Mono on Linux).
 - For large snippets, screenshot mode shows a confirmation prompt before rendering.
 
 ## Output Examples
@@ -159,9 +171,14 @@ npm install
 
 ```text
 src/
-  clipboard.ts          # Clipboard append helper
-  codeBlock.ts          # Formatting and markdown language mapping
-  extension.ts          # Command registration and execution
+  clipboard.ts                   # Clipboard append helper
+  codeBlock.ts                   # Formatting and markdown language mapping
+  extension.ts                   # Command registration and execution
+  screenshot.ts                  # Screenshot command orchestration
+  screenshot/
+    nodeRenderer.ts              # highlight.js → SVG → PNG (resvg-wasm) pipeline
+    theme.ts                     # Built-in screenshot themes and syntax palettes
+    themePicker.ts               # Webview HTML for the visual theme picker
   test/
     clipboard.test.ts
     codeBlock.test.ts
