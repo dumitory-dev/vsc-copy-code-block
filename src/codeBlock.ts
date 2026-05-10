@@ -3,18 +3,23 @@ export function makeCodeBlock(
     filePath: string,
     startLine: number,
 ): string {
+    const lineNumberedCode = addLineNumbers(code, startLine);
+    return [`path: ${filePath}`, lineNumberedCode].join('\n');
+}
+
+function addLineNumbers(code: string, startLine: number): string {
     const normalizedCode = normalizeLineEndings(code);
     const codeLines = normalizedCode.split('\n');
     const maxLineNumber = startLine + codeLines.length - 1;
     const maxPadding = maxLineNumber.toString().length;
 
-    const lineNumberedCode = codeLines.map((line, index) => {
-        const lineNumber = startLine + index;
-        const paddedLineNumber = lineNumber.toString().padStart(maxPadding, ' ');
-        return `${paddedLineNumber}: ${line}`;
-    });
-
-    return [`path: ${filePath}`, lineNumberedCode.join('\n')].join('\n');
+    return codeLines
+        .map((line, index) => {
+            const lineNumber = startLine + index;
+            const paddedLineNumber = lineNumber.toString().padStart(maxPadding, ' ');
+            return `${paddedLineNumber}: ${line}`;
+        })
+        .join('\n');
 }
 
 const extensionToMarkdownLanguage: Record<string, string> = {
@@ -57,12 +62,16 @@ export function getMarkdownLanguage(filePath: string): string {
     return extensionToMarkdownLanguage[extension] ?? '';
 }
 
-export function makeMarkdownCodeBlock(code: string, filePath: string): string {
-    const normalizedCode = normalizeLineEndings(code);
+export function makeMarkdownCodeBlock(
+    code: string,
+    filePath: string,
+    startLine: number,
+): string {
     const language = getMarkdownLanguage(filePath);
     const openingFence = language ? `\`\`\`${language}` : '```';
+    const lineNumberedCode = addLineNumbers(code, startLine);
 
-    return [`path: ${filePath}`, openingFence, normalizedCode, '```'].join('\n');
+    return [`path: ${filePath}`, openingFence, lineNumberedCode, '```'].join('\n');
 }
 
 function normalizeLineEndings(value: string): string {

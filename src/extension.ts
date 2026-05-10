@@ -36,7 +36,7 @@ async function copyCodeBlock({ append, format }: { append: boolean; format: Copy
 
     const output = normalizedText
         ? format === 'markdown'
-            ? makeMarkdownCodeBlock(normalizedText, relativePath)
+            ? makeMarkdownCodeBlock(normalizedText, relativePath, startLine)
             : makeCodeBlock(normalizedText, relativePath, startLine)
         : `path: ${relativePath}`;
 
